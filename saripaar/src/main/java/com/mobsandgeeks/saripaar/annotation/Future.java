@@ -17,6 +17,7 @@ package com.mobsandgeeks.saripaar.annotation;
 import android.support.annotation.StringRes;
 
 import com.mobsandgeeks.saripaar.DateFormats;
+import com.mobsandgeeks.saripaar.TimePrecision;
 import com.mobsandgeeks.saripaar.rule.FutureRule;
 
 import java.lang.annotation.ElementType;
@@ -32,10 +33,19 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface Future {
-    @StringRes int dateFormatResId()    default -1;
-    String dateFormat()                 default DateFormats.DMY;
+    int sequence() default -1;
 
-    @StringRes int messageResId()       default -1;
-    String message()                    default "Date should be in the future";
-    int sequence()                      default -1;
+    int messageResId() default -1;
+
+    String message() default "Date should be in future";
+
+    TimePrecision precision() default TimePrecision.YEAR;
+
+    int offset() default 0;
+
+    boolean strict() default true;
+
+    int flags() default 0;
+
+    int errorCode() default -1;
 }

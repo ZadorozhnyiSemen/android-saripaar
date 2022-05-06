@@ -36,9 +36,8 @@ public class NotEmptyRule extends ContextualAnnotationRule<NotEmpty, String> {
         if (data != null) {
             String text = mRuleAnnotation.trim() ? data.trim() : data;
 
-            Context context = mValidationContext.getContext();
             String emptyText = mRuleAnnotation.emptyTextResId() != -1
-                    ? context.getString(mRuleAnnotation.emptyTextResId())
+                    ? ""
                     : mRuleAnnotation.emptyText();
 
             isEmpty = emptyText.equals(text) || "".equals(text);

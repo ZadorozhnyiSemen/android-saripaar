@@ -25,18 +25,19 @@ import com.mobsandgeeks.saripaar.exception.ConversionException;
  * @author Ragunath Jawahar {@literal <rj@mobsandgeeks.com>}
  * @since 2.0
  */
-public class TextViewDoubleAdapter extends TextViewBaseAdapter<Double> {
+public class TextViewDoubleAdapter implements ViewDataAdapter<TextView, Double> {
     private static final String REGEX_DECIMAL = "[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?";
 
-    @Override
-    public Double getData(final TextView textView) throws ConversionException {
-        String doubleString = textView.getText().toString().trim();
-        if (!doubleString.matches(REGEX_DECIMAL)) {
-            String message = String.format("Expected a floating point number, but was %s",
-                doubleString);
-            throw new ConversionException(message);
-        }
+    public TextViewDoubleAdapter() {
+    }
 
-        return Double.parseDouble(doubleString);
+    public Double getData(TextView editText) throws ConversionException {
+        String doubleString = editText.getText().toString().trim();
+        if (!doubleString.matches("[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?")) {
+            String message = String.format("Expected a floating point number, but was %s", doubleString);
+            throw new ConversionException(message);
+        } else {
+            return Double.parseDouble(doubleString);
+        }
     }
 }

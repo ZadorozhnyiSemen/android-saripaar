@@ -31,16 +31,33 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface CreditCard {
-    Type[] cardTypes()  default {
-        Type.AMEX, Type.DINERS, Type.DISCOVER,
-        Type.MASTERCARD, Type.VISA
-    };
+    CreditCard.Type[] cardTypes() default {CreditCard.Type.AMEX, CreditCard.Type.DINERS, CreditCard.Type.DISCOVER, CreditCard.Type.MASTERCARD, CreditCard.Type.VISA, CreditCard.Type.MAESTRO, CreditCard.Type.JCB, CreditCard.Type.UNIONPAY, CreditCard.Type.MIR, CreditCard.Type.INTERPAYMENT, CreditCard.Type.UATP};
 
-    @StringRes int messageResId()   default -1;
-    String message()                default "Invalid card";
-    int sequence()                  default -1;
+    int sequence() default -1;
 
-    enum Type {
-        AMEX, DINERS, DISCOVER, MASTERCARD, VISA, NONE
+    int messageResId() default -1;
+
+    String message() default "Invalid card";
+
+    int flags() default 0;
+
+    int errorCode() default -1;
+
+    public static enum Type {
+        AMEX,
+        DINERS,
+        DISCOVER,
+        MASTERCARD,
+        VISA,
+        MAESTRO,
+        JCB,
+        UNIONPAY,
+        MIR,
+        INTERPAYMENT,
+        UATP,
+        NONE;
+
+        private Type() {
+        }
     }
 }

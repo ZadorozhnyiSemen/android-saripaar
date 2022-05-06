@@ -27,15 +27,24 @@ import android.content.Context;
  * @since 1.0
  */
 public abstract class Rule<VALIDATABLE> {
-    private final int mSequence;
+    public static final int FLAG_ULTIMATE = 1;
 
+    private final int mSequence;
+    protected final int mFlags;
+    protected String mMessage;
+
+
+    protected Rule(int sequence) {
+        this(sequence, 0);
+    }
     /**
      * Constructor.
      *
      * @param sequence  The sequence number for this {@link com.mobsandgeeks.saripaar.Rule}.
      */
-    protected Rule(final int sequence) {
+    protected Rule(final int sequence, final int flags) {
         mSequence = sequence;
+        mFlags = flags;
     }
 
     /**
@@ -65,5 +74,23 @@ public abstract class Rule<VALIDATABLE> {
      */
     public final int getSequence() {
         return mSequence;
+    }
+
+    public final boolean isUltimate() {
+        return (this.mFlags & 1) != 0;
+    }
+
+    public final boolean isValidateOnFocusLost() {
+        return (this.mFlags & 2) != 0;
+    }
+
+    public final boolean isCustomValidation() {
+        return (this.mFlags & 4) != 0;
+    }
+
+    public abstract int getErrorCode();
+
+    public final void setMessage(String message) {
+        this.mMessage = message;
     }
 }

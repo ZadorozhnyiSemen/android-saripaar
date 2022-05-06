@@ -25,15 +25,10 @@ import java.lang.annotation.Annotation;
  * @since 2.0
  */
 public class RadioButtonBooleanAdapter implements ViewDataAdapter<RadioButton, Boolean> {
-
-    @Override
-    public Boolean getData(final RadioButton radioButton) {
-        return radioButton.isChecked();
+    public RadioButtonBooleanAdapter() {
     }
 
-    @Override
-    public <T extends Annotation> boolean containsOptionalValue(final RadioButton radioButton,
-            final T ruleAnnotation) {
-        return !radioButton.isChecked();
+    public Boolean getData(RadioButton radioButton) {
+        return radioButton.isChecked();
     }
 }

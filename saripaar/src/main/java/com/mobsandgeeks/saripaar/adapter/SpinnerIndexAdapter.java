@@ -28,18 +28,10 @@ import java.lang.annotation.Annotation;
  * @since 2.0
  */
 public class SpinnerIndexAdapter implements ViewDataAdapter<Spinner, Integer> {
-
-    @Override
-    public Integer getData(final Spinner spinner) {
-        return spinner.getSelectedItemPosition();
+    public SpinnerIndexAdapter() {
     }
 
-    @Override
-    public <T extends Annotation> boolean containsOptionalValue(final Spinner spinner,
-            final T ruleAnnotation) {
-        int selection = spinner.getSelectedItemPosition();
-
-        return ruleAnnotation instanceof Select
-                && selection == ((Select) ruleAnnotation).defaultSelection();
+    public Integer getData(Spinner spinner) {
+        return spinner.getSelectedItemPosition();
     }
 }

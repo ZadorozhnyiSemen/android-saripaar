@@ -31,11 +31,17 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface Pattern {
-    @StringRes int regexResId()     default -1;
-    String regex()                  default ".*";
-    boolean caseSensitive()         default true;
+    String regex();
 
-    @StringRes int messageResId()   default -1;
-    String message()                default "Input does not match pattern";
-    int sequence()                  default -1;
+    boolean caseSensitive() default true;
+
+    int sequence() default -1;
+
+    int messageResId() default -1;
+
+    String message() default "Input does not match pattern";
+
+    int flags() default 0;
+
+    int errorCode() default -1;
 }

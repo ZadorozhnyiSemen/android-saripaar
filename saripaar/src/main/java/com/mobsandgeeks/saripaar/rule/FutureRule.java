@@ -16,6 +16,7 @@ package com.mobsandgeeks.saripaar.rule;
 
 import android.content.Context;
 
+import com.mobsandgeeks.saripaar.AnnotationRule;
 import com.mobsandgeeks.saripaar.ContextualAnnotationRule;
 import com.mobsandgeeks.saripaar.ValidationContext;
 import com.mobsandgeeks.saripaar.annotation.Future;
@@ -23,35 +24,25 @@ import com.mobsandgeeks.saripaar.annotation.Future;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+
+import commons.validator.routines.DateValidator;
 
 /**
  * @author Ragunath Jawahar {@literal <rj@mobsandgeeks.com>}
  * @since 2.0
  */
-public class FutureRule extends ContextualAnnotationRule<Future, String> {
+public class FutureRule extends AnnotationRule<Future, Date> {
 
-    protected FutureRule(final Future future, final ValidationContext validationContext) {
-        super(future, validationContext);
+    private Calendar mSrcCalendar;
+    private Calendar mDestCalendar;
+
+    protected FutureRule(Future future) {
+        super(future);
     }
 
-    @Override
-    public boolean isValid(final String dateString) {
-        DateFormat dateFormat = getDateFormat();
-        Date parsedDate = null;
-        try {
-            parsedDate = dateFormat.parse(dateString);
-        } catch (ParseException ignored) {}
-
-        Date now = new Date();
-        return parsedDate != null && parsedDate.after(now);
-    }
-
-    private DateFormat getDateFormat() {
-        Context context = mValidationContext.getContext();
-        int dateFormatResId = mRuleAnnotation.dateFormatResId();
-        String dateFormatString =  dateFormatResId != -1
-                ? context.getString(dateFormatResId) : mRuleAnnotation.dateFormat();
-        return new SimpleDateFormat(dateFormatString);
+    public boolean isValid(Date data) {
+        return DateValidator.FUTURE_VALIDATOR.isValid(((Future)this.mRuleAnnotation).strict(), ((Future)this.mRuleAnnotation).precision(), ((Future)this.mRuleAnnotation).offset(), data);
     }
 }

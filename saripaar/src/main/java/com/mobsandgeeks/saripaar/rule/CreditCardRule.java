@@ -20,6 +20,7 @@ import com.mobsandgeeks.saripaar.annotation.CreditCard;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 
 import commons.validator.routines.CreditCardValidator;
@@ -29,33 +30,39 @@ import commons.validator.routines.CreditCardValidator;
  * @since 2.0
  */
 public class CreditCardRule extends AnnotationRule<CreditCard, String> {
-    private static final Map<CreditCard.Type, Long> CARD_TYPE_REGISTRY =
-            new HashMap<CreditCard.Type, Long>(){{
-                put(CreditCard.Type.AMEX, CreditCardValidator.AMEX);
-                put(CreditCard.Type.DINERS, CreditCardValidator.DINERS);
-                put(CreditCard.Type.DISCOVER, CreditCardValidator.DISCOVER);
-                put(CreditCard.Type.MASTERCARD, CreditCardValidator.MASTERCARD);
-                put(CreditCard.Type.VISA, CreditCardValidator.VISA);
-            }};
+    private static final Map<CreditCard.Type, Long> CARD_TYPE_REGISTRY = new HashMap<CreditCard.Type, Long>() {
+        {
+            this.put(CreditCard.Type.AMEX, CreditCardValidator.AMEX);
+            this.put(CreditCard.Type.DINERS, CreditCardValidator.DINERS);
+            this.put(CreditCard.Type.DISCOVER, CreditCardValidator.DISCOVER);
+            this.put(CreditCard.Type.MASTERCARD, CreditCardValidator.MASTERCARD);
+            this.put(CreditCard.Type.VISA, CreditCardValidator.VISA);
+            this.put(CreditCard.Type.MAESTRO, CreditCardValidator.MAESTRO);
+            this.put(CreditCard.Type.JCB, CreditCardValidator.JCB);
+            this.put(CreditCard.Type.UNIONPAY, CreditCardValidator.UNIONPAY);
+            this.put(CreditCard.Type.MIR, CreditCardValidator.MIR);
+            this.put(CreditCard.Type.INTERPAYMENT, CreditCardValidator.INTERPAYMENT);
+            this.put(CreditCard.Type.UATP, CreditCardValidator.UATP);
+        }
+    };
 
-    protected CreditCardRule(final CreditCard creditCard) {
+    protected CreditCardRule(CreditCard creditCard) {
         super(creditCard);
     }
 
-    @Override
-    public boolean isValid(final String creditCardNumber) {
-        CreditCard.Type[] types = mRuleAnnotation.cardTypes();
-        HashSet<CreditCard.Type> typesSet = new HashSet<CreditCard.Type>(Arrays.asList(types));
-
-        long options = 0;
+    public boolean isValid(String creditCardNumber) {
+        CreditCard.Type[] types = ((CreditCard)this.mRuleAnnotation).cardTypes();
+        HashSet<CreditCard.Type> typesSet = new HashSet(Arrays.asList(types));
+        long options = 0L;
+        CreditCard.Type type;
         if (!typesSet.contains(CreditCard.Type.NONE)) {
-            for (CreditCard.Type type : typesSet) {
-                options += CARD_TYPE_REGISTRY.get(type);
+            for(Iterator var6 = typesSet.iterator(); var6.hasNext(); options += (Long)CARD_TYPE_REGISTRY.get(type)) {
+                type = (CreditCard.Type)var6.next();
             }
         } else {
-            options = CreditCardValidator.NONE;
+            options = 0L;
         }
 
-        return new CreditCardValidator(options).isValid(creditCardNumber.replaceAll("\\s", ""));
+        return (new CreditCardValidator(options)).isValid(creditCardNumber.replaceAll("\\s", ""));
     }
 }

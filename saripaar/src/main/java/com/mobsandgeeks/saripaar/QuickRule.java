@@ -14,6 +14,7 @@
 
 package com.mobsandgeeks.saripaar;
 
+import android.content.Context;
 import android.view.View;
 
 /**
@@ -30,24 +31,14 @@ import android.view.View;
  */
 public abstract class QuickRule<VIEW extends View> extends Rule<VIEW> {
 
-    /**
-     * Default constructor.
-     */
     protected QuickRule() {
         super(-1);
     }
-
     /**
-     * Constructor.
-     *
-     * @param sequence  A non-negative integer value.
+     * Default constructor.
      */
-    protected QuickRule(final int sequence) {
-        super(sequence);
-        if (sequence < 0) {
-            String message = "'sequence' should be a non-negative integer.";
-            throw new IllegalArgumentException(message);
-        }
+    protected QuickRule(int flags) {
+        super(-1, flags);
     }
 
     /**
@@ -58,4 +49,8 @@ public abstract class QuickRule<VIEW extends View> extends Rule<VIEW> {
      * @return true if valid, false otherwise.
      */
     public abstract boolean isValid(VIEW view);
+
+    public String getMessage(Context context) {
+        return this.mMessage;
+    }
 }

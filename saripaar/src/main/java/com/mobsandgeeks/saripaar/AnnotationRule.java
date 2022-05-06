@@ -43,25 +43,29 @@ public abstract class AnnotationRule<RULE_ANNOTATION extends Annotation, DATA_TY
      * @param ruleAnnotation  The rule {@link java.lang.annotation.Annotation} instance to which
      *      this rule is paired.
      */
-    protected AnnotationRule(final RULE_ANNOTATION ruleAnnotation) {
-        super(ruleAnnotation != null
-                ? Reflector.getAttributeValue(ruleAnnotation, "sequence", Integer.TYPE) : -1);
+    protected AnnotationRule(RULE_ANNOTATION ruleAnnotation) {
+        super(ruleAnnotation != null ? (Integer)Reflector.getAttributeValue(ruleAnnotation, "sequence", Integer.TYPE) : -1, ruleAnnotation != null ? (Integer)Reflector.getAttributeValue(ruleAnnotation, "flags", Integer.TYPE) : 0);
         if (ruleAnnotation == null) {
             throw new IllegalArgumentException("'ruleAnnotation' cannot be null.");
+        } else {
+            this.mRuleAnnotation = ruleAnnotation;
         }
-        mRuleAnnotation = ruleAnnotation;
+    }
+
+    public int getErrorCode() {
+        return (Integer)Reflector.getAttributeValue(this.mRuleAnnotation, "errorCode", Integer.class);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public String getMessage(final Context context) {
-        final int messageResId = Reflector.getAttributeValue(mRuleAnnotation, "messageResId",
-                Integer.class);
-
-        return messageResId != -1
-                ? context.getString(messageResId)
-                : Reflector.getAttributeValue(mRuleAnnotation, "message", String.class);
+    public String getMessage(Context context) {
+        if (this.mMessage != null) {
+            return this.mMessage;
+        } else {
+            int messageResId = (Integer)Reflector.getAttributeValue(this.mRuleAnnotation, "messageResId", Integer.class);
+            return messageResId != -1 ? context.getString(messageResId) : (String)Reflector.getAttributeValue(this.mRuleAnnotation, "message", String.class);
+        }
     }
 }

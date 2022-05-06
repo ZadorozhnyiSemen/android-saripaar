@@ -24,6 +24,7 @@ import com.mobsandgeeks.saripaar.exception.ConversionException;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,39 +36,27 @@ import java.util.Set;
  * @since 2.0
  */
 public class ValidationContext {
+    Map<View, ArrayList<Pair<Rule, ViewDataAdapter>>> mViewRulesMap;
 
-    // Attributes
-    private Map<View, ArrayList<Pair<Rule, ViewDataAdapter>>> mViewRulesMap;
-    private Context mContext;
-
-    ValidationContext(final Context context) {
-        this.mContext = context;
+    ValidationContext() {
     }
 
-    /**
-     * Retrieves all {@link android.view.View}s that are annotated with the specified annotation.
-     *
-     * @param saripaarAnnotation  The annotation we are interested in.
-     *
-     * @return A {@link java.util.List} of {@link android.view.View}s annotated with the
-     *      given annotation.
-     */
-    public List<View> getAnnotatedViews(final Class<? extends Annotation> saripaarAnnotation) {
-        assertNotNull(saripaarAnnotation, "saripaarAnnotation");
-        assertIsRegisteredAnnotation(saripaarAnnotation);
+    public List<View> getAnnotatedViews(Class<? extends Annotation> saripaarAnnotation) {
+        this.assertNotNull(saripaarAnnotation, "saripaarAnnotation");
+        this.assertIsRegisteredAnnotation(saripaarAnnotation);
+        Class<? extends AnnotationRule> annotationRuleClass = this.getRuleClass(saripaarAnnotation);
+        List<View> annotatedViews = new ArrayList();
+        Set<View> views = this.mViewRulesMap.keySet();
+        Iterator var5 = views.iterator();
 
-        // Get the AnnotationRule class
-        Class<? extends AnnotationRule> annotationRuleClass = getRuleClass(saripaarAnnotation);
+        while(var5.hasNext()) {
+            View view = (View)var5.next();
+            ArrayList<Pair<Rule, ViewDataAdapter>> ruleAdapterPairs = (ArrayList)this.mViewRulesMap.get(view);
+            Iterator var8 = ruleAdapterPairs.iterator();
 
-        // Find all views with the target rule
-        List<View> annotatedViews = new ArrayList<View>();
-        Set<View> views = mViewRulesMap.keySet();
-        for (View view : views) {
-            ArrayList<Pair<Rule, ViewDataAdapter>> ruleAdapterPairs = mViewRulesMap.get(view);
-            for (Pair<Rule, ViewDataAdapter> ruleAdapterPair : ruleAdapterPairs) {
-                boolean uniqueMatchingView =
-                        annotationRuleClass.equals(ruleAdapterPair.first.getClass())
-                                && !annotatedViews.contains(view);
+            while(var8.hasNext()) {
+                Pair<Rule, ViewDataAdapter> ruleAdapterPair = (Pair)var8.next();
+                boolean uniqueMatchingView = annotationRuleClass.equals(((Rule)ruleAdapterPair.first).getClass()) && !annotatedViews.contains(view);
                 if (uniqueMatchingView) {
                     annotatedViews.add(view);
                 }
@@ -77,29 +66,21 @@ public class ValidationContext {
         return annotatedViews;
     }
 
-    /**
-     * Retrieves the data from the given {@link android.view.View} using the appropriate
-     * {@link com.mobsandgeeks.saripaar.adapter.ViewDataAdapter}.
-     *
-     * @param view  A {@link android.view.View}.
-     * @param saripaarAnnotation  The annotation used to annotate the {@link android.view.View}.
-     *
-     * @return The data that's on the {@link android.view.View}.
-     */
-    public Object getData(final View view, Class<? extends Annotation> saripaarAnnotation) {
-        assertNotNull(view, "view");
-        assertNotNull(saripaarAnnotation, "saripaarAnnotation");
-
+    public Object getData(View view, Class<? extends Annotation> saripaarAnnotation) {
+        this.assertNotNull(view, "view");
+        this.assertNotNull(saripaarAnnotation, "saripaarAnnotation");
         Object data = null;
-        ArrayList<Pair<Rule, ViewDataAdapter>> ruleAdapterPairs = mViewRulesMap.get(view);
-        Class<? extends AnnotationRule> annotationRuleClass = getRuleClass(saripaarAnnotation);
+        ArrayList<Pair<Rule, ViewDataAdapter>> ruleAdapterPairs = (ArrayList)this.mViewRulesMap.get(view);
+        Class<? extends AnnotationRule> annotationRuleClass = this.getRuleClass(saripaarAnnotation);
+        Iterator var6 = ruleAdapterPairs.iterator();
 
-        for (Pair<Rule, ViewDataAdapter> ruleAdapterPair : ruleAdapterPairs) {
-            if (annotationRuleClass.equals(ruleAdapterPair.first.getClass())) {
+        while(var6.hasNext()) {
+            Pair<Rule, ViewDataAdapter> ruleAdapterPair = (Pair)var6.next();
+            if (annotationRuleClass.equals(((Rule)ruleAdapterPair.first).getClass())) {
                 try {
-                    data = ruleAdapterPair.second.getData(view);
-                } catch (ConversionException e) {
-                    e.printStackTrace();
+                    data = ((ViewDataAdapter)ruleAdapterPair.second).getData(view);
+                } catch (ConversionException var9) {
+                    var9.printStackTrace();
                 }
             }
         }
@@ -107,43 +88,26 @@ public class ValidationContext {
         return data;
     }
 
-    /**
-     * Get a {@link Context}.
-     *
-     * @return A {@link Context}.
-     */
-    public Context getContext() {
-        return mContext;
+    void setViewRulesMap(Map<View, ArrayList<Pair<Rule, ViewDataAdapter>>> viewRulesMap) {
+        this.mViewRulesMap = viewRulesMap;
     }
 
-    void setViewRulesMap(final Map<View, ArrayList<Pair<Rule, ViewDataAdapter>>> viewRulesMap) {
-        mViewRulesMap = viewRulesMap;
-    }
-
-    /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     *  Private Methods
-     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     */
-    private void assertNotNull(final Object object, final String argumentName) {
+    private void assertNotNull(Object object, String argumentName) {
         if (object == null) {
             String message = String.format("'%s' cannot be null.", argumentName);
             throw new IllegalArgumentException(message);
         }
     }
 
-    private void assertIsRegisteredAnnotation(
-            final Class<? extends Annotation> saripaarAnnotation) {
+    private void assertIsRegisteredAnnotation(Class<? extends Annotation> saripaarAnnotation) {
         if (!Validator.isSaripaarAnnotation(saripaarAnnotation)) {
-            String message = String.format("%s is not a registered Saripaar annotation.",
-                    saripaarAnnotation.getName());
+            String message = String.format("%s is not a registered Saripaar annotation.", saripaarAnnotation.getName());
             throw new IllegalArgumentException(message);
         }
     }
 
-    private Class<? extends AnnotationRule> getRuleClass(
-            final Class<? extends Annotation> saripaarAnnotation) {
-        ValidateUsing validateUsingAnnotation = saripaarAnnotation
-                .getAnnotation(ValidateUsing.class);
+    private Class<? extends AnnotationRule> getRuleClass(Class<? extends Annotation> saripaarAnnotation) {
+        ValidateUsing validateUsingAnnotation = (ValidateUsing)saripaarAnnotation.getAnnotation(ValidateUsing.class);
         return validateUsingAnnotation.value();
     }
 }

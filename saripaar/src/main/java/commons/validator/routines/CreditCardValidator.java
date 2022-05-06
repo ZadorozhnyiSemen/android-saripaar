@@ -74,7 +74,7 @@ public class CreditCardValidator implements Serializable {
     /**
      * Option specifying that American Express cards are allowed.
      */
-    public static final long AMEX = 1 << 0;
+    public static final long AMEX = 1;
 
     /**
      * Option specifying that Visa cards are allowed.
@@ -96,39 +96,54 @@ public class CreditCardValidator implements Serializable {
      */
     public static final long DINERS = 1 << 4;
 
+    public static final long MAESTRO = 1 << 5;
+    public static final long JCB = 1 << 6;
+    public static final long UNIONPAY = 1 << 7;
+    public static final long MIR = 1 << 8;
+    public static final long INTERPAYMENT = 1 << 9;
+    public static final long INSTAPAYMENT = 1 << 10;
+    public static final long UATP = 1 << 11;
+
     /**
      * The CreditCardTypes that are allowed to pass validation.
      */
-    private final List cardTypes = new ArrayList();
+    private final List cardTypes;
+
+    private static final RegexValidator AMEX_REGEX = new RegexValidator(new String[]{"^(3[47]\\d{13})$"});
+    private static final RegexValidator VISA_REGEX = new RegexValidator(new String[]{"^(4)(\\d{12}|\\d{15}|\\d{19})$"});
+    private static final RegexValidator MASTERCARD_REGEX = new RegexValidator(new String[]{"^(5[1-5]\\d{14})$", "^((222[1-9]|22[3-9][0-9]|2[3-6][0-9]{2}|27[01][0-9]|2720)\\d{12})$"});
+    private static final RegexValidator DISCOVER_REGEX = new RegexValidator(new String[]{"^(6011\\d{12})$", "^(64[4-9]\\d{13})$", "^(65\\d{14})$", "^(62212[6-9]|6221[3-9]|622[2-8]|62290|62291|62292[0-5]\\d{10})$"});
+    private static final RegexValidator DINERS_REGEX = new RegexValidator(new String[]{"^(30[0-5]\\d{11}|3095\\d{10}|3[68-9]\\d{12})$"});
+    private static final RegexValidator MAESTRO_REGEX = new RegexValidator(new String[]{"^(5[06-9]\\d{10,17})|(6[0-9]\\d{10,17})$"});
+    private static final RegexValidator JCB_REGEX = new RegexValidator(new String[]{"^(352[89]\\d{12})|(35[3-8][0-9]\\d{12})$"});
+    private static final RegexValidator UNIONPAY_REGEX = new RegexValidator(new String[]{"^(62\\d{14})$"});
+    private static final RegexValidator MIR_REGEX = new RegexValidator(new String[]{"^(220[0-4]\\d{12,15})$"});
+    private static final RegexValidator INTERPAYMENT_REGEX = new RegexValidator(new String[]{"^(636\\d{13})$"});
+    private static final RegexValidator UATP_REGEX = new RegexValidator(new String[]{"^(1\\d{14})$"});
 
     /**
      * Luhn checkdigit validator for the card numbers.
      */
     private static final CheckDigit LUHN_VALIDATOR = LuhnCheckDigit.LUHN_CHECK_DIGIT;
-
-    /** American Express (Amex) Card Validator */
-    public static final CodeValidator AMEX_VALIDATOR = new CodeValidator("^(3[47]\\d{13})$", LUHN_VALIDATOR);
-
-    /** Diners Card Validator */
-    public static final CodeValidator DINERS_VALIDATOR = new CodeValidator("^(30[0-5]\\d{11}|3095\\d{10}|36\\d{12}|3[8-9]\\d{12})$", LUHN_VALIDATOR);
-
-    /** Discover Card regular expressions */
-    private static final RegexValidator DISCOVER_REGEX = new RegexValidator(new String[] {"^(6011\\d{12})$", "^(64[4-9]\\d{13})$", "^(65\\d{14})$"});
-
-    /** Discover Card Validator */
-    public static final CodeValidator DISCOVER_VALIDATOR = new CodeValidator(DISCOVER_REGEX, LUHN_VALIDATOR);
-
-    /** Mastercard Card Validator */
-    public static final CodeValidator MASTERCARD_VALIDATOR = new CodeValidator("^(5[1-5]\\d{14})$", LUHN_VALIDATOR);
-
-    /** Visa Card Validator */
-    public static final CodeValidator VISA_VALIDATOR = new CodeValidator("^(4)(\\d{12}|\\d{15})$", LUHN_VALIDATOR);
+    public static final CodeValidator AMEX_VALIDATOR;
+    public static final CodeValidator VISA_VALIDATOR;
+    public static final CodeValidator MASTERCARD_VALIDATOR;
+    public static final CodeValidator DISCOVER_VALIDATOR;
+    public static final CodeValidator DINERS_VALIDATOR;
+    public static final CodeValidator MAESTRO_VALIDATOR;
+    public static final CodeValidator JCB_VALIDATOR;
+    public static final CodeValidator UNIONPAY_VALIDATOR;
+    public static final CodeValidator MIR_VALIDATOR;
+    public static final CodeValidator INTERPAYMENT_VALIDATOR;
+    public static final CodeValidator UATP_VALIDATOR;
 
     /**
      * Create a new CreditCardValidator with default options.
      */
     public CreditCardValidator() {
-        this(AMEX + VISA + MASTERCARD + DISCOVER);
+        this(AMEX + VISA + MASTERCARD + DISCOVER + MAESTRO +
+                JCB + UNIONPAY + MIR + INTERPAYMENT + INSTAPAYMENT + UATP
+        );
     }
 
     /**
@@ -138,27 +153,51 @@ public class CreditCardValidator implements Serializable {
      * those are the only valid card types.
      */
     public CreditCardValidator(long options) {
-        super();
-
-        if (isOn(options, VISA)) {
+        this.cardTypes = new ArrayList();
+        if (this.isOn(options, 2L)) {
             this.cardTypes.add(VISA_VALIDATOR);
         }
 
-        if (isOn(options, AMEX)) {
+        if (this.isOn(options, 1L)) {
             this.cardTypes.add(AMEX_VALIDATOR);
         }
 
-        if (isOn(options, MASTERCARD)) {
+        if (this.isOn(options, 4L)) {
             this.cardTypes.add(MASTERCARD_VALIDATOR);
         }
 
-        if (isOn(options, DISCOVER)) {
+        if (this.isOn(options, 8L)) {
             this.cardTypes.add(DISCOVER_VALIDATOR);
         }
 
-        if (isOn(options, DINERS)) {
+        if (this.isOn(options, 16L)) {
             this.cardTypes.add(DINERS_VALIDATOR);
         }
+
+        if (this.isOn(options, 64L)) {
+            this.cardTypes.add(JCB_VALIDATOR);
+        }
+
+        if (this.isOn(options, 128L)) {
+            this.cardTypes.add(UNIONPAY_VALIDATOR);
+        }
+
+        if (this.isOn(options, 32L)) {
+            this.cardTypes.add(MAESTRO_VALIDATOR);
+        }
+
+        if (this.isOn(options, 256L)) {
+            this.cardTypes.add(MIR_VALIDATOR);
+        }
+
+        if (this.isOn(options, 512L)) {
+            this.cardTypes.add(INTERPAYMENT_VALIDATOR);
+        }
+
+        if (this.isOn(options, 2048L)) {
+            this.cardTypes.add(UATP_VALIDATOR);
+        }
+
     }
 
     /**
@@ -166,6 +205,7 @@ public class CreditCardValidator implements Serializable {
      * @param creditCardValidators Set of valid code validators
      */
     public CreditCardValidator(CodeValidator[] creditCardValidators) {
+        this.cardTypes = new ArrayList();
         if (creditCardValidators == null) {
             throw new IllegalArgumentException("Card validators are missing");
         }
@@ -226,4 +266,17 @@ public class CreditCardValidator implements Serializable {
         return (options & flag) > 0;
     }
 
+    static {
+        AMEX_VALIDATOR = new CodeValidator(AMEX_REGEX, LUHN_VALIDATOR);
+        VISA_VALIDATOR = new CodeValidator(VISA_REGEX, LUHN_VALIDATOR);
+        MASTERCARD_VALIDATOR = new CodeValidator(MASTERCARD_REGEX, LUHN_VALIDATOR);
+        DISCOVER_VALIDATOR = new CodeValidator(DISCOVER_REGEX, LUHN_VALIDATOR);
+        DINERS_VALIDATOR = new CodeValidator(DINERS_REGEX, LUHN_VALIDATOR);
+        MAESTRO_VALIDATOR = new CodeValidator(MAESTRO_REGEX, LUHN_VALIDATOR);
+        JCB_VALIDATOR = new CodeValidator(JCB_REGEX, LUHN_VALIDATOR);
+        UNIONPAY_VALIDATOR = new CodeValidator(UNIONPAY_REGEX, LUHN_VALIDATOR);
+        MIR_VALIDATOR = new CodeValidator(MIR_REGEX, LUHN_VALIDATOR);
+        INTERPAYMENT_VALIDATOR = new CodeValidator(INTERPAYMENT_REGEX, LUHN_VALIDATOR);
+        UATP_VALIDATOR = new CodeValidator(UATP_REGEX, LUHN_VALIDATOR);
+    }
 }

@@ -16,6 +16,7 @@ package com.mobsandgeeks.saripaar.rule;
 
 import android.content.Context;
 
+import com.mobsandgeeks.saripaar.AnnotationRule;
 import com.mobsandgeeks.saripaar.ContextualAnnotationRule;
 import com.mobsandgeeks.saripaar.ValidationContext;
 import com.mobsandgeeks.saripaar.annotation.Past;
@@ -25,33 +26,18 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import commons.validator.routines.DateValidator;
+
 /**
  * @author Ragunath Jawahar {@literal <rj@mobsandgeeks.com>}
  * @since 2.0
  */
-public class PastRule extends ContextualAnnotationRule<Past, String> {
-
-    protected PastRule(final Past past, final ValidationContext validationContext) {
-        super(past, validationContext);
+public class PastRule extends AnnotationRule<Past, Date> {
+    protected PastRule(Past past) {
+        super(past);
     }
 
-    @Override
-    public boolean isValid(final String dateString) {
-        DateFormat dateFormat = getDateFormat();
-        Date parsedDate = null;
-        try {
-            parsedDate = dateFormat.parse(dateString);
-        } catch (ParseException ignored) {}
-
-        Date now = new Date();
-        return parsedDate != null && parsedDate.before(now);
-    }
-
-    private DateFormat getDateFormat() {
-        Context context = mValidationContext.getContext();
-        int dateFormatResId = mRuleAnnotation.dateFormatResId();
-        String dateFormatString =  dateFormatResId != -1
-                ? context.getString(dateFormatResId) : mRuleAnnotation.dateFormat();
-        return new SimpleDateFormat(dateFormatString);
+    public boolean isValid(Date data) {
+        return DateValidator.PAST_VALIDATOR.isValid(((Past)this.mRuleAnnotation).strict(), ((Past)this.mRuleAnnotation).precision(), ((Past)this.mRuleAnnotation).offset(), data);
     }
 }

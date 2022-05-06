@@ -25,15 +25,10 @@ import java.lang.annotation.Annotation;
  * @since 2.0
  */
 public class CheckBoxBooleanAdapter implements ViewDataAdapter<CheckBox, Boolean> {
-
-    @Override
-    public Boolean getData(final CheckBox checkBox) {
-        return checkBox.isChecked();
+    public CheckBoxBooleanAdapter() {
     }
 
-    @Override
-    public <T extends Annotation> boolean containsOptionalValue(final CheckBox checkBox,
-            final T ruleAnnotation) {
-        return !checkBox.isChecked();
+    public Boolean getData(CheckBox checkBox) {
+        return checkBox.isChecked();
     }
 }
