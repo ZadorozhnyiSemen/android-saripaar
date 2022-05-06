@@ -142,11 +142,6 @@ public class RegexValidator implements Serializable {
             for(int i = 0; i < this.patterns.length; ++i) {
                 Matcher matcher = this.patterns[i].matcher(value);
                 if (matcher.matches()) {
-                    int count = matcher.groupCount();
-                    if (count == 1) {
-                        return matcher.group(1);
-                    }
-
                     return value;
                 }
             }
